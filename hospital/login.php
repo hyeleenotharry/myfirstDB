@@ -33,11 +33,11 @@ if ($result->num_rows > 0) {
         $firstDigit = substr($enteredId, 0, 1);
         if ($firstDigit === '1') {
             // Doctor 화면으로 이동
-            header("Location: doctor_page.php");
+            header("Location: routes/doctor_page.php");
             exit();
         } elseif ($firstDigit === '2') {
             // Nurse 화면으로 이동
-            header("Location: nurse_page.php");
+            header("Location: routes/nurse_page.php");
             exit();
         } else {
             // 기타 화면으로 이동
