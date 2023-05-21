@@ -1,19 +1,56 @@
 <?php
-// 사용자가 제출한 로그인 폼에서 전달된 데이터를 가져옴
-$username = $_POST['username'];
-$password = $_POST['password'];
+// MySQL 데이터베이스 연결 정보
+$servername = "localhost";
+$username = "root";
+$password = "dlgpfl@1029";
+$dbname = "sys";
 
-// 실제 사용자 인증 로직을 구현
-// 여기서는 간단히 예시를 들기 위해 고정된 사용자 이름과 비밀번호를 체크하는 것으로 가정
-$validUsername = 'john';
-$validPassword = '1029';
+// POST로 전달된 사용자 입력 값
+$enteredId = $_POST['id'];
+$enteredPassword = $_POST['password'];
 
-if ($username == $validUsername && $password == $validPassword) {
-    // 인증 성공 시, 로그인 완료 페이지로 리다이렉션 또는 다음 로직을 추가
-    header('Location: login_success.php');
-    exit;
-} else {
-    // 인증 실패 시, 오류 메시지를 출력하거나 다음 로직을 추가
-    echo '인증 실패';
+// MySQL 연결
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// 연결 확인
+if ($conn->connect_error) {
+    die("MySQL 연결 실패: " . $conn->connect_error);
 }
+
+// 입력받은 ID로 사용자 조회
+$sql = "SELECT * FROM users WHERE id = '$enteredId'";
+$result = $conn->query($sql);
+
+// 사용자 확인
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $storedPassword = $row['password'];
+
+    // 입력받은 비밀번호와 저장된 비밀번호 비교
+    if ($enteredPassword === $storedPassword) {
+        echo "로그인 성공";
+        // 로그인 성공한 경우 추가적인 작업 수행
+        $firstDigit = substr($enteredId, 0, 1);
+        if ($firstDigit === '1') {
+            // Doctor 화면으로 이동
+            header("Location: doctor_page.php");
+            exit();
+        } elseif ($firstDigit === '2') {
+            // Nurse 화면으로 이동
+            header("Location: nurse_page.php");
+            exit();
+        } else {
+            // 기타 화면으로 이동
+            header("Location: other_page.php");
+            exit();
+        }
+    } else {
+        echo "비밀번호가 일치하지 않습니다.";
+    }
+} else {
+    echo "사용자가 존재하지 않습니다.";
+}
+
+// MySQL 연결 종료
+$conn->close();
 ?>
