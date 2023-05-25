@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,8 +17,6 @@
         <input type="submit" name="analysis" value="Analysis">
     </form>
 
-    <form method="post" action="rewrite_chart.php">
-        <input type="submit" name="rewrite_chart" value="Rewrite Chart">
-    </form>
+    
 </body>
 </html>
