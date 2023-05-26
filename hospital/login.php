@@ -49,19 +49,24 @@ if (isset($_POST['submit'])) {
 
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Login</title>
+  <title>Login</title>
 </head>
-<body>
+
+<body style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);">
+  <center>
     <h1>Login</h1>
     <form method="post" action="">
-        <label for="username">Username:</label>
-        <input type="number" name="username" id="username" required><br>
+      <label for="username">Username:</label>
+      <input type="number" name="username" id="username" required><br>
 
-        <label for="password">Password:</label>
-        <input type="number" name="password" id="password" required><br>
+      <label for="password">Password:</label>
+      <input type="number" name="password" id="password" required><br>
 
-        <input type="submit" name="submit" value="Login">
+      <input type="submit" name="submit" value="Login">
     </form>
+  </center>
 </body>
+
 </html>
