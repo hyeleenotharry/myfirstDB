@@ -1,9 +1,9 @@
 <?php
 // Database connection details
 $servername = "localhost";
-$username = "your_username";
-$password = "your_password";
-$dbname = "your_database_name";
+$username = "web";
+$password = "web_admin";
+$dbname = "company";
 
 // Establish the database connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -23,14 +23,14 @@ if (isset($_POST['submit'])) {
     $searchValue = $_POST['search'];
 
     // Prepare the SQL statement based on the selected condition
-    $sql = "SELECT * FROM CHART c JOIN DIAGNOSIS d ON c.chart_id = d.chart_id ";
+    $sql = "SELECT * FROM CHART c JOIN MEDICER d ON c.CDIG = d.DIGID ";
 
-    if ($searchCondition === 'name') {
-        $sql .= "WHERE c.의사ID LIKE '%$searchValue%'";
+    if ($searchCondition === 'doct_id') {
+        $sql .= "WHERE c.CDOC = '$searchValue'";
     } elseif ($searchCondition === 'date') {
-        $sql .= "WHERE c.진료날짜 = '$searchValue'";
-    } elseif ($searchCondition === 'id') {
-        $sql .= "WHERE c.차트번호 = '$searchValue'";
+        $sql .= "WHERE d.VDATE = '$searchValue'";
+    } elseif ($searchCondition === 'chart_no') {
+        $sql .= "WHERE c.CNO = '$searchValue'";
     }
 
     // Execute the query
@@ -58,15 +58,20 @@ if (isset($_POST['submit'])) {
             background-color: #f2f2f2;
         }
     </style>
+    <script>
+        function showAlert() {
+            alert("No matching result found!");
+        }
+    </script>
 </head>
 <body>
     <h1>Search</h1>
     <form method="post" action="">
         <label for="condition">Search Condition:</label>
         <select name="condition" id="condition">
-            <option value="name" <?php if ($searchCondition === '의사ID') echo 'selected'; ?>>doct_ID</option>
-            <option value="date" <?php if ($searchCondition === '진료날짜') echo 'selected'; ?>>Date</option>
-            <option value="id" <?php if ($searchCondition === '환자ID') echo 'selected'; ?>>patient_ID</option>
+            <option value="doct_id" <?php if ($searchCondition === 'doct_id') echo 'selected'; ?>>doct_ID</option>
+            <option value="date" <?php if ($searchCondition === 'date') echo 'selected'; ?>>date</option>
+            <option value="chart_no" <?php if ($searchCondition === 'chart_no') echo 'selected'; ?>>chart_no</option>
         </select>
         <br>
         <label for="search">Search Value:</label>
@@ -76,23 +81,40 @@ if (isset($_POST['submit'])) {
 
     <?php
     // Display search results if available
-    if (isset($result) && $result->num_rows > 0) {
-        echo "<h2>Search Results:</h2>";
-        echo "<table>";
-        echo "<tr><th>Chart ID</th><th>Name</th><th>Date</th><th>Diagnosis</th></tr>";
-        while ($row = $result->fetch_assoc()) {
+    
+    // Button to go to 'doctor_page.php'
+    echo "<br>";
+    echo "<form action='doctor_page.php'>";
+    echo "<input type='submit' value='Go to Doctor Page'>";
+    echo "</form>";
+    if (isset($result)) {
+        if ($result->num_rows > 0) {
+            echo "<h2>Search Results:</h2>";
+            echo "<table>";
+            echo "<tr><th>Chart No</th><th>Patient ID</th><th>Nurse ID</th><th>Doctor ID</th><th>Date</th><th>Pres</th><th>Symptom</th></tr>";
+            $row = $result->fetch_assoc();
             echo "<tr>";
-            echo "<td>" . $row['chart_no'] . "</td>";
-            echo "<td>" . $row['환자id'] . "</td>";
-            echo "<td>" . $row['간호사id'] . "</td>";
-            echo "<td>" . $row['의사id'] . "</td>";
-            echo "<td>" . $row['진료날짜'] . "</td>";
-            echo "<td>" . $row['의사소'] . "</td>";
-            echo "<td>" . $row['진료내용'] . "</td>";
+            echo "<td>" . $row['CNO'] . "</td>";
+            echo "<td>" . $row['CPAT'] . "</td>";
+            echo "<td>" . $row['CNUR'] . "</td>";
+            echo "<td>" . $row['CDOC'] . "</td>";
+            echo "<td>" . $row['VDATE'] . "</td>";
+            echo "<td>" . $row['PRES'] . "</td>";
+            echo "<td>" . $row['SYMPTOM'] . "</td>";
             echo "</tr>";
+            echo "</table>";
+
+            // Button to go to 'doctor_page.php'
+//            echo "<br>";
+//            echo "<form action='doctor_page.php'>";
+//            echo "<input type='submit' value='Go to Doctor Page'>";
+//            echo "</form>";
+        } else {
+            // No matching result found
+            echo "<script>showAlert();</script>";
         }
-        echo "</table>";
     }
     ?>
+
 </body>
 </html>

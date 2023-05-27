@@ -1,9 +1,6 @@
 <?php
-require_once('path/to/jpgraph/src/jpgraph.php');
-require_once('path/to/jpgraph/src/jpgraph_bar.php');
-require_once('path/to/mysql-connector-php/autoload.php');
-
-use PhpMyAdmin\SqlParser\Utils\Query;
+require_once('C:\xampp\php\jpgraph-4.4.1\jpgraph-4.4.1\src\jpgraph.php');
+require_once('C:\xampp\php\jpgraph-4.4.1\jpgraph-4.4.1\src\jpgraph_bar.php');
 
 // MariaDB database connection settings
 $host = 'localhost';
@@ -20,20 +17,16 @@ if ($conn->connect_error) {
 }
 
 // Handle button click
-if (isset($_POST['action'])) { //if the button is not null
+if (isset($_POST['action'])) {
     $action = $_POST['action'];
 
     // Generate chart
     if ($action === 'chart') {
         generateChart($conn);
     }
-    // Generate grid
-    elseif ($action === 'grid') {
-        generateGrid($conn);
-    }
-    // Generate diagnosis date chart
-    elseif ($action === 'diagnosis_date_chart') {
-        generateDiagnosisDateChart($conn);
+    // Generate table
+    elseif ($action === 'table') {
+        generateTable($conn);
     }
 }
 
@@ -41,7 +34,7 @@ if (isset($_POST['action'])) { //if the button is not null
 function generateChart($conn) {
     // Execute SQL query to get the count of patients by age and sex
     $query = "
-        SELECT sex, SUBSTRING(birthdate, 1, 2) AS year, SUBSTRING(birthdate, 3, 2) AS month, SUBSTRING(birthdate, 5, 2) AS day, COUNT(*) AS count
+        SELECT sex, SUBSTRING(resid,8,1) AS gubun, SUBSTRING(resid,1, 2) AS year, COUNT(*) AS count
         FROM patient
         GROUP BY sex, year
         ORDER BY sex, year
@@ -49,142 +42,210 @@ function generateChart($conn) {
     $result = $conn->query($query);
 
     // Prepare data for plotting
-    $maleData = array();  //make array
-    $femaleData = array();
-    $ageLabels = array();
-    while ($row = $result->fetch_assoc()) {
-        $sex = $row['sex'];
-        $year = $row['year'];
-        $month = $row['month'];
-        $day = $row['day'];
-        $count = $row['count'];
+		$maleData = array("20s" => 0, "30s" => 0, "40s" => 0, "50s" => 0, "60s" => 0);
+		$femaleData = array("20s" => 0, "30s" => 0, "40s" => 0, "50s" => 0, "60s" => 0);
+		$ageLabels = array("20s", "30s", "40s", "50s", "60s");
+		$maxCount = 0;
 
-        // Calculate age based on birthdate
-        $currentDate = date('Y-m-d');
-        $birthdate = $year . '-' . $month . '-' . $day;
-        $age = date_diff(date_create($birthdate), date_create($currentDate))->y;
+		while ($row = $result->fetch_assoc()) {
+    		$sex = $row['sex'];
+    		$gubun = $row['gubun'];
+    		$year = $row['year'];
+    		$count = $row['count'];
+    		
+    		if($gubun==1 || $gubun==2)    //1900년대(남자:1, 여자:2)
+        	$year_prefix = "19";
+    		else if($gubun==3 || $gubun==4)    //2000년대(남자:3, 여자:4)
+        	$year_prefix = "20";
+    		else if($gubun==9 || $gubun==0)    //1800년대(남자:9, 여자:0)
+        	$year_prefix = "18";
+    		else
+        	return 0;
 
-        if ($sex == 'M') {
-            $maleData[] = $count;  
-        } else {
-            $femaleData[] = $count;
-        }
+    		// Determine the age group based on the year
+    		$age = (date('Y') - intval($year_prefix.$year)) + 1;
 
-        $ageLabels[] = strval($age);  //change to string
-    }
+    		// Assign the age group label based on the calculated age
+    		if ($age >= 20 && $age < 30) {
+        		$ageLabel = "20s";
+    		} elseif ($age >= 30 && $age < 40) {
+        		$ageLabel = "30s";
+    		} elseif ($age >= 40 && $age < 50) {
+        		$ageLabel = "40s";
+    		} elseif ($age >= 50 && $age < 60) {
+        		$ageLabel = "50s";
+    		} elseif ($age >= 60) {
+        		$ageLabel = "60s";
+    		}
 
-    // Create a new bar graph instance
+    		if ($sex == 'M') {
+        	$maleData[$ageLabel] += $count;
+    		} else {
+        	$femaleData[$ageLabel] += $count;
+    		}
+    		
+    		if ($count > $maxCount){
+    			$maxCount = $count;
+    		}
+    		
+    		if(!in_array($ageLabel, $ageLabels)){
+    			$ageLabels[] = $ageLabel;
+    		}
+		}
+		
+		sort($ageLabels);
+
+		// Set the order of age groups for x-axis labels
+//		$ageLabels = array('20s', '30s', '40s', '50s', '60s');
+
+    // Create the graph
     $graph = new Graph(600, 400);
     $graph->SetScale('textlin');
+
+    // Set up the titles
+    $graph->title->Set('Number of Patients by Age Group and Gender');
+    $graph->xaxis->title->Set('Age Group');
+    $graph->yaxis->title->Set('Number of Patients');
+
+    // Set up the colors for male and female
+    $maleColor = '#3366cc';
+    $femaleColor = '#ff6699';
 
     // Create a new bar plot for male data
-    $malePlot = new BarPlot($maleData);
-    $malePlot->SetFillColor('white');
-    $malePlot->SetLegend('Male');
+		$malePlot = new BarPlot(array_values($maleData));
+		$malePlot->SetFillColor('blue');
+		$malePlot->SetLegend('Male');
 
-    // Create a new bar plot for female data
-    $femalePlot = new BarPlot($femaleData);
-    $femalePlot->SetFillColor('green');
-    $femalePlot->SetLegend('Female');
+		// Create a new bar plot for female data
+		$femalePlot = new BarPlot(array_values($femaleData));
+		$femalePlot->SetFillColor('red');
+		$femalePlot->SetLegend('Female');
 
-    // Add the bar plots to the graph
-    $graph->Add($malePlot);
-    $graph->Add($femalePlot);
+    // Create a grouped bar plot
+		$gbplot = new GroupBarPlot(array($malePlot, $femalePlot));
 
-    // Set labels for the x-axis
-    $graph->xaxis->SetTickLabels($ageLabels);
+		// Add the bar plots to the graph
+		$graph->Add($gbplot);
 
-    // Set titles for the graph and axes
-    $graph->title->Set('Number of Patients by Age and Sex');
-    $graph->xaxis->title->Set('Age');
-    $graph->yaxis->title->Set('Count');
+		// Set labels for the x-axis
+		$xAxisLabels = $ageLabels;
+		$graph->xaxis->SetTickLabels($xAxisLabels);
 
-    // Create a legend for the bar plots
-    $graph->legend->Pos(0.5, 0.99, 'center', 'bottom');
+		// Calculate the maximum value for the y-axis with a margin
+		$margin = 10; // Adjust the margin as needed
+		$yMax = ceil(($maxCount + $margin) / 10) * 10; // Round up to the nearest multiple of 10
+		$graph->yaxis->scale->SetAutoMax($yMax);
 
-    // Output the graph
-    $graph->Stroke();
-}
-
-// Function to generate the grid
-function generateGrid($conn) {
+		// Display the graph
+		$graph->Stroke();
+		}
+		
+		// Function to generate the table
+function generateTable($conn) {
     // Execute SQL query to get the count of patients by age and sex
     $query = "
-        SELECT sex, SUBSTRING(birthdate, 1, 2) AS year, SUBSTRING(birthdate, 3, 2) AS month, SUBSTRING(birthdate, 5, 2) AS day, COUNT(*) AS count
+        SELECT sex, SUBSTRING(resid,8,1) AS gubun, SUBSTRING(resid,1, 2) AS year, COUNT(*) AS count
         FROM patient
-        GROUP BY sex, year, month, day
-        ORDER BY sex, year, month, day
+        GROUP BY sex, year
+        ORDER BY sex, year
     ";
     $result = $conn->query($query);
 
-    // Prepare data for displaying in grid
-    $data = array();
+    // Prepare data for the table
+    $tableData = array();
+    $ageGroups = array('20s', '30s', '40s', '50s', '60s');
+
+    // Initialize table data array
+    foreach ($ageGroups as $ageGroup) {
+        $tableData[$ageGroup] = array('F' => 0, 'M' => 0);
+    }
+
+    // Process query results and populate table data
     while ($row = $result->fetch_assoc()) {
         $sex = $row['sex'];
+        $gubun = $row['gubun'];
         $year = $row['year'];
-        $month = $row['month'];
-        $day = $row['day'];
         $count = $row['count'];
 
-        // Calculate age based on birthdate
-        $currentDate = date('Y-m-d');
-        $birthdate = $year . '-' . $month . '-' . $day;
-        $age = date_diff(date_create($birthdate), date_create($currentDate))->y;
+        if ($gubun == 1 || $gubun == 2) {
+            $year_prefix = "19";
+        } elseif ($gubun == 3 || $gubun == 4) {
+            $year_prefix = "20";
+        } elseif ($gubun == 9 || $gubun == 0) {
+            $year_prefix = "18";
+        } else {
+            return 0;
+        }
 
-        $data[] = array('Sex' => $sex, 'Age' => $age, 'Count' => $count);
+        // Determine the age group based on the year
+        $age = (date('Y') - intval($year_prefix . $year)) + 1;
+
+        // Assign the age group label based on the calculated age
+        if ($age >= 20 && $age < 30) {
+            $ageGroup = "20s";
+        } elseif ($age >= 30 && $age < 40) {
+            $ageGroup = "30s";
+        } elseif ($age >= 40 && $age < 50) {
+            $ageGroup = "40s";
+        } elseif ($age >= 50 && $age < 60) {
+            $ageGroup = "50s";
+        } elseif ($age >= 60) {
+            $ageGroup = "60s";
+        }
+
+        // Increment the count for the corresponding age group and sex
+        $tableData[$ageGroup][$sex] += $count;
     }
 
-    // Display the data in a grid
-    echo "<table>";
-    echo "<tr><th>Sex</th><th>Age</th><th>Count</th></tr>";
-    foreach ($data as $row) {
-        echo "<tr>";
-        echo "<td>" . $row['Sex'] . "</td>";
-        echo "<td>" . $row['Age'] . "</td>";
-        echo "<td>" . $row['Count'] . "</td>";
-        echo "</tr>";
+    // Generate the table HTML
+    echo '<h2>Number of Patients by Age Group and Gender (Table)</h2>';
+    echo '<table>';
+    echo '<tr>';
+    echo '<th>Age Group</th>';
+    echo '<th>Sex</th>';
+    echo '<th>Number of Patients</th>';
+    echo '</tr>';
+
+    foreach ($ageGroups as $ageGroup) {
+        echo '<tr>';
+        echo '<td>' . $ageGroup . '</td>';
+        echo '<td>F</td>';
+        echo '<td>' . $tableData[$ageGroup]['F'] . '</td>';
+        echo '</tr>';
+
+        echo '<tr>';
+        echo '<td></td>';
+        echo '<td>M</td>';
+        echo '<td>' . $tableData[$ageGroup]['M'] . '</td>';
+        echo '</tr>';
     }
-    echo "</table>";
+
+    echo '</table>';
 }
 
-// Function to generate the diagnosis date chart
-function generateDiagnosisDateChart($conn) {
-    // Execute SQL query to get the count of patients by diagnosis date
-    $query = "
-        SELECT 진료날짜, COUNT(*) AS count
-        FROM patient
-        GROUP BY 진료날짜 
-        ORDER BY 진료날짜
-    ";
-    $result = $conn->query($query);
 
-    // Prepare data for plotting
-    $dates = array();
-    $counts = array();
-    while ($row = $result->fetch_assoc()) {
-        $date = $row['진료날짜'];
-        $count = $row['count'];
 
-        $dates[] = $date;
-        $counts[] = $count;
-    }
+?>
 
-    // Create a new line graph instance
-    $graph = new Graph(600, 400);
-    $graph->SetScale('textlin');
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Data</title>
+</head>
+<body>
+    <h1>Patient Data</h1>
+    <form method="POST" action="">
+        <input type="hidden" name="action" value="chart">
+        <input type="submit" value="Generate Chart">
+        
+    </form>
+    <form method="POST" action="">
+    		<input type="hidden" name="action" value="table">
+    		<input type="submit" value="Generate Table">
+		</form>
+		<form method="POST" action="doctor_page.php">
+    		<input type="submit" value="Go to Doctor Page">
+		</form>
+</body>
+</html>
 
-    // Create a new line plot
-    $linePlot = new LinePlot($counts);
-
-    // Add the line plot to the graph
-    $graph->Add($linePlot);
-
-    // Set labels for the x-axis
-    $graph->xaxis->SetTickLabels($dates);
-
-    // Set titles for the graph and axes
-    $graph->title->Set('Number of Patients by Diagnosis Date');
-    $graph->xaxis->title->Set('Date');
-    $graph->y
-
-   
