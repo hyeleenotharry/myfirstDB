@@ -62,7 +62,7 @@ function generateDayChart($conn) {
     $graph->SetScale('textlin');
 
     // Set graph title
-    $graph->title->Set('Number of Patients Visited by Day');
+    $graph->title->Set('Number of Patients Visited by Month');
 
     // Set X-axis labels
     $graph->xaxis->SetTickLabels($visitMonths);

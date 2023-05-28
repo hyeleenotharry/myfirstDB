@@ -62,7 +62,7 @@ function generateDayChart($conn) {
     $graph->SetScale('textlin');
 
     // Set graph title
-    $graph->title->Set('Number of Patients Visited by Day');
+    $graph->title->Set('Number of Patients Visited by Month');
 
     // Set X-axis labels
     $graph->xaxis->SetTickLabels($visitMonths);
@@ -298,8 +298,8 @@ function generateTable($conn) {
     		<input type="submit" value="Generate Date Chart">
 		</form>
     
-		<form method="POST" action="doctor_page.php">
-    		<input type="submit" value="Go to Doctor Page">
+		<form method="POST" action="patient_page.php">
+    		<input type="submit" value="Go to Patient Page">
 		</form>
 		
 </body>

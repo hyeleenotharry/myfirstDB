@@ -298,8 +298,8 @@ function generateTable($conn) {
     		<input type="submit" value="Generate Date Chart">
 		</form>
     
-		<form method="POST" action="doctor_page.php">
-    		<input type="submit" value="Go to Doctor Page">
+		<form method="POST" action="patient_page.php">
+    		<input type="submit" value="Go to Patient Page">
 		</form>
 		
 </body>

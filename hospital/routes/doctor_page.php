@@ -21,5 +21,10 @@
     <form method="post" action="rewrite_chart.php">
         <input type="submit" name="rewrite_chart" value="Rewrite Chart">
     </form>
+    <form method="POST" action="../login.php">
+        <input type="hidden" name="action" value="logout">
+        <input type="submit" value="Logout">
+    </form>
+
 </body>
 </html>
