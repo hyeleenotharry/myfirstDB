@@ -14,8 +14,6 @@ if (!$conn) {
 } else {
     echo "Database Connection Success!!";
 }
-
-$conn->set_charset("utf8");
 if (mysqli_connect_errno()) {
     echo "Could not connect:" . mysqli_connect_error();
     exit();

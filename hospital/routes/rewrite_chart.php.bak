@@ -16,8 +16,6 @@ if (mysqli_connect_errno()) {
     exit();
 }
 
-$conn->set_charset("utf8");
-
 $query = "SELECT CNO, DISEASE, CDIG, CDOC, CNUR, CPAT, PRES FROM CHART;";
      
 $result = mysqli_query($conn, $query);

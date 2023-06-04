@@ -1,24 +1,24 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-// MySQL ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²° ì„¤ì •//ì¶”ê°€
+// MySQL µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á ¼³Á¤//Ãß°¡
 $servername = "localhost:3306";
 $username = "web";
 $password = "web_admin";
 $dbname = "company";
 
-// ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²° ìƒì„±
+// µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á »ý¼º
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// ì—°ê²° í™•ì¸
+// ¿¬°á È®ÀÎ
 if ($conn->connect_error) {
-    die("ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²° ì‹¤íŒ¨: " . $conn->connect_error);
+    die("µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á ½ÇÆÐ: " . $conn->connect_error);
 }
 
 $conn->set_charset("utf8");
 
-// POST ìš”ì²­ ì²˜ë¦¬
+// POST ¿äÃ» Ã³¸®
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // ì›¹ í¼ì—ì„œ ì „ë‹¬ëœ í™˜ìž ì •ë³´ ìˆ˜ì§‘
+    // À¥ Æû¿¡¼­ Àü´ÞµÈ È¯ÀÚ Á¤º¸ ¼öÁý
     $pid = isset($_POST["pid"]) ? $_POST["pid"] : "";
     $sex = isset($_POST["sex"]) ? $_POST["sex"] : "";
     $name = isset($_POST["name"]) ? $_POST["name"] : "";
@@ -31,24 +31,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mannur = isset($_POST["mannur"]) ? $_POST["mannur"] : "";
 
     if ($pid === "") {
-        echo "ì˜¤ë¥˜: í™˜ìž IDë¥¼ ì œê³µí•´ì•¼ í•©ë‹ˆë‹¤.";
+        echo "¿À·ù: È¯ÀÚ ID¸¦ Á¦°øÇØ¾ß ÇÕ´Ï´Ù.";
     } else {
-        // í™˜ìž ì •ë³´ë¥¼ ë°ì´í„°ë² ì´ìŠ¤ì— ì¶”ê°€í•˜ê¸° ì „ì— ì¤‘ë³µ í™•ì¸
+        // È¯ÀÚ Á¤º¸¸¦ µ¥ÀÌÅÍº£ÀÌ½º¿¡ Ãß°¡ÇÏ±â Àü¿¡ Áßº¹ È®ÀÎ
         $check_query = "SELECT * FROM PATIENT WHERE PID='$pid'";
         $check_result = $conn->query($check_query);
 
         if ($check_result === false) {
-            echo "ì˜¤ë¥˜: " . $check_query . "<br>" . $conn->error;
+            echo "¿À·ù: " . $check_query . "<br>" . $conn->error;
         } elseif ($check_result->num_rows > 0) {
-            echo "ì´ë¯¸ í•´ë‹¹ PIDë¥¼ ê°€ì§„ í™˜ìžê°€ ë°ì´í„°ë² ì´ìŠ¤ì— ì¡´ìž¬í•©ë‹ˆë‹¤.";
+            echo "ÀÌ¹Ì ÇØ´ç PID¸¦ °¡Áø È¯ÀÚ°¡ µ¥ÀÌÅÍº£ÀÌ½º¿¡ Á¸ÀçÇÕ´Ï´Ù.";
         } else {
-            // í™˜ìž ì •ë³´ë¥¼ ë°ì´í„°ë² ì´ìŠ¤ì— ì¶”ê°€í•˜ëŠ” SQL ì¿¼ë¦¬
+            // È¯ÀÚ Á¤º¸¸¦ µ¥ÀÌÅÍº£ÀÌ½º¿¡ Ãß°¡ÇÏ´Â SQL Äõ¸®
             $insert_query = "INSERT INTO PATIENT (PID, SEX, NAME, EMAIL, JOB, RESID, TEL, ADDRESS, MANDOC, MANNUR) VALUES ('$pid', '$sex', '$name', '$email', '$job', '$resid', '$tel', '$address', '$mandoc', '$mannur')";
 
             if ($conn->query($insert_query) === TRUE) {
-                echo "ìƒˆë¡œìš´ í™˜ìž ì •ë³´ê°€ ì„±ê³µì ìœ¼ë¡œ ì¶”ê°€ë˜ì—ˆìŠµë‹ˆë‹¤.";
+                echo "»õ·Î¿î È¯ÀÚ Á¤º¸°¡ ¼º°øÀûÀ¸·Î Ãß°¡µÇ¾ú½À´Ï´Ù.";
             } else {
-                echo "ì˜¤ë¥˜: " . $insert_query . "<br>" . $conn->error;
+                echo "¿À·ù: " . $insert_query . "<br>" . $conn->error;
             }
         }
     }
@@ -61,43 +61,43 @@ $conn->close();
 <html>
 <head>
 		<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
-    <title>ìƒˆë¡œìš´ í™˜ìž ì¶”ê°€</title>
+    <title>»õ·Î¿î È¯ÀÚ Ãß°¡</title>
 </head>
 <body>
 		
-    <h2>ìƒˆë¡œìš´ í™˜ìž ì¶”ê°€</h2>
+    <h2>»õ·Î¿î È¯ÀÚ Ãß°¡</h2>
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-        <label for="pid">í™˜ìž ID:</label>
+        <label for="pid">È¯ÀÚ ID:</label>
         <input type="number" name="pid" required><br>
 
-        <label for="sex">ì„±ë³„:</label>
+        <label for="sex">¼ºº°:</label>
         <input type="text" name="sex" maxlength="1" required><br>
 
-        <label for="name">ì´ë¦„:</label>
+        <label for="name">ÀÌ¸§:</label>
         <input type="text" name="name" maxlength="10" required><br>
 
-        <label for="email">ì´ë©”ì¼:</label>
+        <label for="email">ÀÌ¸ÞÀÏ:</label>
         <input type="email" name="email" maxlength="50" required><br>
 
-        <label for="job">ì§ì—…:</label>
+        <label for="job">Á÷¾÷:</label>
         <input type="text" name="job" maxlength="20" required><br>
 
-        <label for="resid">ì£¼ë¯¼ë“±ë¡ë²ˆí˜¸:</label>
+        <label for="resid">ÁÖ¹Îµî·Ï¹øÈ£:</label>
         <input type="text" name="resid" maxlength="14" required><br>
 
-        <label for="tel">ì „í™”ë²ˆí˜¸:</label>
+        <label for="tel">ÀüÈ­¹øÈ£:</label>
         <input type="text" name="tel" maxlength="13" required><br>
 
-        <label for="address">ì£¼ì†Œ:</label>
+        <label for="address">ÁÖ¼Ò:</label>
         <input type="text" name="address" maxlength="30" required><br>
 
-        <label for="mandoc">ë‹´ë‹¹ ì˜ì‚¬ ID:</label>
+        <label for="mandoc">´ã´ç ÀÇ»ç ID:</label>
         <input type="number" name="mandoc" required><br>
 
-        <label for="mannur">ë‹´ë‹¹ ê°„í˜¸ì‚¬ ID:</label>
+        <label for="mannur">´ã´ç °£È£»ç ID:</label>
         <input type="number" name="mannur" required><br>
 
-        <input type="submit" value="ì¶”ê°€">
+        <input type="submit" value="Ãß°¡">
     </form>
     
     <br>

@@ -20,9 +20,7 @@
         <input type="hidden" name="action" value="logout">
         <input type="submit" value="Logout">
     </form>
-		<form method="POST" action="get_chart_data.php">
-        <input type="submit" name="patient_register" value="Just Chart">
-    </form>
+
 
     
 </body>
