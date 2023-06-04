@@ -38,6 +38,9 @@ if (isset($_POST['submit'])) {
         } elseif ($id >= 20000 && $id < 30000) {
             header("Location: routes/nurse_page.php");
             exit();
+        } elseif ($id >= 30000 && $id < 30081) {
+            header("Location: routes/patient_page.php");
+            exit();
         } else {
             echo "Invalid user type!";
         }
@@ -47,7 +50,7 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html>
 
 <head>
